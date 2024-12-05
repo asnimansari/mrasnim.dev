@@ -1,0 +1,4 @@
+public
+*.env
+static/.DS_Store
+**/.DS_Store
