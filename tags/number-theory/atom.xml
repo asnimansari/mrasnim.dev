@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>Asnim P Ansari - number theory</title>
+    <subtitle>Ramblings on programming, tech and life.</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://mrasnim.dev/tags/number-theory/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://mrasnim.dev/"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2024-06-11T00:00:00+00:00</updated>
+    <id>https://mrasnim.dev/tags/number-theory/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Fermat&#x27;s Little Theorm</title>
+        <published>2024-06-11T00:00:00+00:00</published>
+        <updated>2024-06-11T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://mrasnim.dev/tils/fermats-little-theorm/"/>
+        <id>https://mrasnim.dev/tils/fermats-little-theorm/</id>
+        
+        <content type="html" xml:base="https://mrasnim.dev/tils/fermats-little-theorm/">&lt;p&gt;Fermat’s little theorem states that that if &lt;code&gt;p&lt;&#x2F;code&gt; is a &lt;code&gt;prime number&lt;&#x2F;code&gt; then for any integer &lt;code&gt;a&lt;&#x2F;code&gt;, the number &lt;b&gt;a&lt;sup&gt;p&lt;&#x2F;sup&gt; - a&lt;&#x2F;b&gt; is an integer multiple of &lt;code&gt;p&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Which in modular arthemetic transalates to.&lt;&#x2F;p&gt;
+&lt;p&gt;a&lt;sup&gt;p&lt;&#x2F;sup&gt; ≡ a (mod p)&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;example&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#example&quot; aria-label=&quot;Anchor link for: example&quot;&gt;🔗&lt;&#x2F;a&gt;Example.&lt;&#x2F;h4&gt;
+&lt;p&gt;let &lt;code&gt;a = 2&lt;&#x2F;code&gt; and &lt;code&gt;p = 7&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;a&lt;sup&gt;p&lt;&#x2F;sup&gt; = 2&lt;sup&gt;7&lt;&#x2F;sup&gt; = 128&lt;&#x2F;p&gt;
+&lt;p&gt;then &lt;code&gt;128 - 2&lt;&#x2F;code&gt; is an integer multiple of &lt;code&gt;7&lt;&#x2F;code&gt; which is &lt;code&gt;7 * 18&lt;&#x2F;code&gt; or 2&lt;sup&gt;7&lt;&#x2F;sup&gt; ≡ 2 (mod 7)&lt;&#x2F;p&gt;
+&lt;p&gt;If &lt;code&gt;a&lt;&#x2F;code&gt; is not divisible by &lt;code&gt;p&lt;&#x2F;code&gt;, (ie when &lt;code&gt;a&lt;&#x2F;code&gt; and &lt;code&gt;p&lt;&#x2F;code&gt; are coprime), then a&lt;sup&gt;p-1&lt;&#x2F;sup&gt; ≡ 1 (mod p)&lt;&#x2F;p&gt;
+&lt;p&gt;This can we rewritten to find the inverse of a to like a&lt;sup&gt;p-2&lt;&#x2F;sup&gt;a ≡ 1 (mod p). now a&lt;sup&gt;p-2 is the inverse of &lt;code&gt;a&lt;&#x2F;code&gt; in &lt;code&gt;p&lt;&#x2F;code&gt; prime field.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>
