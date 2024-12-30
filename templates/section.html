@@ -25,7 +25,11 @@
               </time>
             </i>
           </span>
-          <a href="{{ page.permalink }}">{{ page.title }}</a>
+          {% if section.title == "WebFound" and page.extra.link %}
+            <a href="{{ page.extra.link }}" target="_blank" rel="noopener noreferrer">{{ page.title }}</a>
+          {% else %}
+            <a href="{{ page.permalink }}">{{ page.title }}</a>
+          {% endif %}
         </li>
         {% else %}
         <li>

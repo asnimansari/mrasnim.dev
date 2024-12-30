@@ -3,17 +3,18 @@
 set -e
 
 # Ensure a slug is provided
-if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <slug>"
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 <slug> <link>"
     exit 1
 fi
 
 # Variables
 SLUG_ORIG="$1"
+LINK="$2"
 SLUG=$(echo "$SLUG_ORIG" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
-FILE_PATH="content/tils/${SLUG}.md"
+FILE_PATH="content/webfound/${SLUG}.md"
 CURRENT_DATE=$(date +"%Y-%m-%d")
-TITLE=$(echo $SLUG | tr '-' ' ' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));}1')
+TITLE=$(echo "$SLUG_ORIG" | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));}1')
 
 # Check if file already exists
 if [ -f "$FILE_PATH" ]; then
@@ -26,11 +27,13 @@ cat <<EOL > $FILE_PATH
 +++
 title = "$TITLE"
 date = $CURRENT_DATE
-type = "til"
+type = "webfound"
 description = "Description about $TITLE"
 in_search_index = true
 [taxonomies]
-tags = ["Specify Tags"]
+tags = ["webfound"]
+[extra]
+link = "$LINK"
 +++
 
 EOL

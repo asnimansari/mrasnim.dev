@@ -40,9 +40,9 @@ url = "@/posts/_index.md"
 name = "TIL"
 url = "@/tils/_index.md"
 
-# [[extra.main_menu]]
-# name = "Travel"
-# url = "@/travel/_index.md"
+[[extra.main_menu]]
+name = "WebFound"
+url = "@/webfound/_index.md"
 
 [[extra.main_menu]]
 name = "Contact"
