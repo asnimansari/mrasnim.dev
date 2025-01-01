@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>Asnim P Ansari - Today I Learned</title>
+    <subtitle>Ramblings on programming, tech and life.</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://mrasnim.dev/tils/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://mrasnim.dev/tils/"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2024-12-31T00:00:00+00:00</updated>
+    <id>https://mrasnim.dev/tils/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Deleting Duplicate Records In Posgtgres</title>
+        <published>2024-12-31T00:00:00+00:00</published>
+        <updated>2024-12-31T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://mrasnim.dev/tils/deleting-duplicate-records-in-posgtgres/"/>
+        <id>https://mrasnim.dev/tils/deleting-duplicate-records-in-posgtgres/</id>
+        
+        <content type="html" xml:base="https://mrasnim.dev/tils/deleting-duplicate-records-in-posgtgres/">&lt;pre data-lang=&quot;sql&quot; style=&quot;background-color:#2b303b;color:#6c7079;&quot; class=&quot;language-sql &quot;&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;-- Create sample table
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;CREATE TABLE &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5cb3fa;&quot;&gt;employees&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; (
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    id &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;SERIAL PRIMARY KEY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    first_name &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;VARCHAR&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;50&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;),
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    last_name &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;VARCHAR&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;50&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;),
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    email &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;VARCHAR&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;100&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;),
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    department &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;VARCHAR&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;50&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;),
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    salary &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;NUMERIC&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;10&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;-- Insert sample data with duplicates
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;INSERT INTO&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; employees (first_name, last_name, email, department, salary) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;VALUES
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;John&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Doe&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;john.doe@example.com&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;IT&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;50000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;00&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;),
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;John&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Doe&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;john.doe@example.com&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;IT&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;50000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;00&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;),
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Jane&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Smith&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;jane.smith@example.com&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;HR&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;55000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;00&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;),
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Jane&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Smith&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;jane.smith@example.com&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;HR&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;55000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;00&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;),
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Mike&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Johnson&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;mike.johnson@example.com&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Finance&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;60000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;00&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;),
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Mike&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Johnson&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;mike.johnson@example.com&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Finance&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;60000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;00&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;-- Method 1: Delete duplicates keeping lowest ID
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;WITH&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; duplicates &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;AS&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; (
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;SELECT
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;        id,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;        ROW_NUMBER() OVER (
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            PARTITION BY first_name, last_name, email
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;ORDER BY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; id
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;        ) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;AS&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; row_num
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; employees
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;DELETE FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; employees
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;WHERE&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; id &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;IN&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; (
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;SELECT&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; id
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; duplicates
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;WHERE&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; row_num &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;-- Method 2: Delete duplicates using CTID
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;DELETE FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; employees
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;WHERE&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; ctid NOT &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;IN&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; (
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;SELECT &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;MIN&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(ctid)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; employees
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;GROUP BY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; first_name, last_name, email
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;-- Method 3: Advanced deletion with custom criteria
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;WITH&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; cte &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;AS&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; (
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;SELECT
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;        ROW_NUMBER() OVER (
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            PARTITION BY first_name, last_name, email
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;ORDER BY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; salary &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;DESC
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;        ) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;AS&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; rn
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; employees
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;DELETE FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; employees
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;WHERE&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; id &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;IN&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; (
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;SELECT&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; id
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; cte
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;WHERE&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; rn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;-- Verify results
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;SELECT &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; employees;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Attachment Theory</title>
+        <published>2024-12-26T00:00:00+00:00</published>
+        <updated>2024-12-26T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://mrasnim.dev/tils/attachment-theory/"/>
+        <id>https://mrasnim.dev/tils/attachment-theory/</id>
+        
+        <content type="html" xml:base="https://mrasnim.dev/tils/attachment-theory/">&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Attachment_theory&quot;&gt;Attachment Theory on Wikipedia&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>IKEA Effect</title>
+        <published>2024-12-14T00:00:00+00:00</published>
+        <updated>2024-12-14T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://mrasnim.dev/tils/ikea-effect/"/>
+        <id>https://mrasnim.dev/tils/ikea-effect/</id>
+        
+        <content type="html" xml:base="https://mrasnim.dev/tils/ikea-effect/">&lt;p&gt;The IKEA effect is a cognitive bias that describes how people tend to value objects more if they make or assemble them themselves&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>NMEA 0183</title>
+        <published>2024-12-07T00:00:00+00:00</published>
+        <updated>2024-12-07T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://mrasnim.dev/tils/nmea/"/>
+        <id>https://mrasnim.dev/tils/nmea/</id>
+        
+        <content type="html" xml:base="https://mrasnim.dev/tils/nmea/">&lt;p&gt;NMEA 0183 is a standard for electronic navigation devices between marine electronic devices such as GPS, autopilot, sonars and other instruments.&lt;&#x2F;p&gt;
+&lt;p&gt;Though NMEA 2000 replaces 0183, 0183 is still widely used.&lt;&#x2F;p&gt;
+&lt;p&gt;I found an interesting Rust repo which parses NMEA 0183 Sentences &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;AeroRust&#x2F;nmea&quot;&gt;AeroRust&#x2F;nmea&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Rust Decorator</title>
+        <published>2024-11-06T00:00:00+00:00</published>
+        <updated>2024-11-06T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://mrasnim.dev/tils/rust-decorator/"/>
+        <id>https://mrasnim.dev/tils/rust-decorator/</id>
+        
+        <content type="html" xml:base="https://mrasnim.dev/tils/rust-decorator/">&lt;p&gt;I wanted to add see if there were any options like a &lt;code&gt;python decorator&lt;&#x2F;code&gt; in rust to wrap functions and add run some function before and after a function, example wrapping a function with extra logs, like tracking time it took for execution. Though my original requirement was to use redis lock for certain functions&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#6c7079;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;std::future::Future;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;std::pin::Pin;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;std::task::{Context, Poll};
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;std::time::Instant;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;&#x2F;&#x2F; Define `add_logging` to accept an async function
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5cb3fa;&quot;&gt;add_logging&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;&amp;lt;F, Fut&amp;gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;: F) -&amp;gt; impl Fn() -&amp;gt; Pin&amp;lt;Box&amp;lt;dyn Future&amp;lt;Output = ()&amp;gt;&amp;gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;where
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    F: Fn() -&amp;gt; Fut + Send + Sync + &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;&amp;#39;static&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    Fut: Future&amp;lt;Output = ()&amp;gt; + Send + &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;&amp;#39;static&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;|| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;        Box::pin(async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            println!(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;Before async function call&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; start &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;Instant::now();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;().await;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; duration &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; start.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;elapsed&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            println!(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;After async function call. Duration: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, duration);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;        })
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5cb3fa;&quot;&gt;my_function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;() {
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    println!(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;This is my async function!&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;#[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;tokio&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;&#x2F;&#x2F; Or `async-std::main` depending on your runtime
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5cb3fa;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;() {
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; decorated_function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;add_logging&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(my_function);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;decorated_function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;().await; &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;&#x2F;&#x2F; Calls the wrapped async function
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now the issue here is we can’t pass arguments to the above function which is being wrapped as it is a &lt;code&gt;Fn()&lt;&#x2F;code&gt;. and the way to pass functions dynamically is using something as follows..&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#6c7079;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;std::future::Future;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;std::pin::Pin;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;std::time::Instant;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;&#x2F;&#x2F; Define `add_logging` to accept a function with dynamic parameters
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5cb3fa;&quot;&gt;add_logging&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;&amp;lt;F, Fut, Args&amp;gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;: F) -&amp;gt; impl Fn(Args) -&amp;gt; Pin&amp;lt;Box&amp;lt;dyn Future&amp;lt;Output = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;Fut::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;Output&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;+ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;Send&amp;gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;where
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    F: Fn(Args) -&amp;gt; Fut + Send + Sync + &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;&amp;#39;static&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    Fut: Future + Send + &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;&amp;#39;static&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    Args: Send + &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;&amp;#39;static&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;|&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;args: Args&lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;        Box::pin(async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            println!(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;Before async function call&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; start &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;Instant::now();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; result &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(args).await;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; duration &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; start.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;elapsed&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            println!(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;After async function call. Duration: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, duration);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            result &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;&#x2F;&#x2F; Return the result of the wrapped function
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;        })
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;&#x2F;&#x2F; Example async function with parameters
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5cb3fa;&quot;&gt;my_function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;input&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;: String, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;count&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;usize&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;) -&amp;gt; String {
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    println!(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;Inside my_function with input: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;, count: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, input, count);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    format!(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;Processed: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt; (count: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;)&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, input, count)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;#[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;tokio&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;]
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5cb3fa;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;() {
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;&#x2F;&#x2F; Decorate the async function
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; decorated_function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;add_logging&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(|(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;input&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;count&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;): (String, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;usize&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;)| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;my_function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(input, count));
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;&#x2F;&#x2F; Call the decorated function with dynamic parameters
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; result &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;decorated_function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;((&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;Hello, world!&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;to_string&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(), &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;42&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;)).await;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    println!(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;Result: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, result);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Redis Keys Count Bash</title>
+        <published>2024-10-09T00:00:00+00:00</published>
+        <updated>2024-10-09T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://mrasnim.dev/tils/redis-keys-count-bash/"/>
+        <id>https://mrasnim.dev/tils/redis-keys-count-bash/</id>
+        
+        <content type="html" xml:base="https://mrasnim.dev/tils/redis-keys-count-bash/">&lt;p&gt;Wanted to fetch a script to find keys matching pattern from redis, without blocking the redis server.&lt;&#x2F;p&gt;
+&lt;p&gt;Created a bash snippet for the same use case.&lt;&#x2F;p&gt;
+&lt;p&gt;Assumptions..&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;Redis doesn’t use any password&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;redis-cli&lt;&#x2F;code&gt; is already installed&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;Usage&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;Save the script as &lt;code&gt;find_redis_keys.sh&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;Make the script executable by &lt;code&gt;chmod +x&lt;&#x2F;code&gt; &lt;code&gt;find_redis_keys.sh&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;Run the script using &lt;code&gt;.&#x2F;list_redis_keys_with_count.sh &quot;user:*&quot;&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#6c7079;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;#!&#x2F;bin&#x2F;bash
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;# Declare Redis connection constants
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;REDIS_HOST&lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;127.0.0.1&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;REDIS_PORT&lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;6379&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;# Check if a pattern argument is provided
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;[ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;-z &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;]&lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;then
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;echo &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;Usage: $&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt; &amp;lt;pattern&amp;gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;exit&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; 1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;fi
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;# Define the pattern passed as an argument
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;PATTERN&lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;# Initialize cursor to 0 for the first scan
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;CURSOR&lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;0
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;# Loop until the cursor is 0 (indicating the scan is complete)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;while &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;do
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;# Run the scan command and capture the result
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;RESULT&lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;$(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;redis-cli -h &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;REDIS_HOST&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt; -p &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;REDIS_PORT&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt; --scan --pattern &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;PATTERN&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt; --cursor &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;CURSOR&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;# Extract the new cursor and the keys from the result
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;CURSOR&lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;$(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;echo &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;RESULT&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;head -n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt; 1)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;KEYS&lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;$(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;echo &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;RESULT&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;tail -n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt; +2)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;# Print the keys
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;echo &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;KEYS&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;# If the cursor is 0, we&amp;#39;ve finished scanning
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;[ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;CURSOR&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;== &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;0&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;]&lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;then
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;break
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;fi
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;done
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Fermat&#x27;s Little Theorm</title>
+        <published>2024-06-11T00:00:00+00:00</published>
+        <updated>2024-06-11T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://mrasnim.dev/tils/fermats-little-theorm/"/>
+        <id>https://mrasnim.dev/tils/fermats-little-theorm/</id>
+        
+        <content type="html" xml:base="https://mrasnim.dev/tils/fermats-little-theorm/">&lt;p&gt;Fermat’s little theorem states that that if &lt;code&gt;p&lt;&#x2F;code&gt; is a &lt;code&gt;prime number&lt;&#x2F;code&gt; then for any integer &lt;code&gt;a&lt;&#x2F;code&gt;, the number &lt;b&gt;a&lt;sup&gt;p&lt;&#x2F;sup&gt; - a&lt;&#x2F;b&gt; is an integer multiple of &lt;code&gt;p&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Which in modular arthemetic transalates to.&lt;&#x2F;p&gt;
+&lt;p&gt;a&lt;sup&gt;p&lt;&#x2F;sup&gt; ≡ a (mod p)&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;example&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#example&quot; aria-label=&quot;Anchor link for: example&quot;&gt;🔗&lt;&#x2F;a&gt;Example.&lt;&#x2F;h4&gt;
+&lt;p&gt;let &lt;code&gt;a = 2&lt;&#x2F;code&gt; and &lt;code&gt;p = 7&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;a&lt;sup&gt;p&lt;&#x2F;sup&gt; = 2&lt;sup&gt;7&lt;&#x2F;sup&gt; = 128&lt;&#x2F;p&gt;
+&lt;p&gt;then &lt;code&gt;128 - 2&lt;&#x2F;code&gt; is an integer multiple of &lt;code&gt;7&lt;&#x2F;code&gt; which is &lt;code&gt;7 * 18&lt;&#x2F;code&gt; or 2&lt;sup&gt;7&lt;&#x2F;sup&gt; ≡ 2 (mod 7)&lt;&#x2F;p&gt;
+&lt;p&gt;If &lt;code&gt;a&lt;&#x2F;code&gt; is not divisible by &lt;code&gt;p&lt;&#x2F;code&gt;, (ie when &lt;code&gt;a&lt;&#x2F;code&gt; and &lt;code&gt;p&lt;&#x2F;code&gt; are coprime), then a&lt;sup&gt;p-1&lt;&#x2F;sup&gt; ≡ 1 (mod p)&lt;&#x2F;p&gt;
+&lt;p&gt;This can we rewritten to find the inverse of a to like a&lt;sup&gt;p-2&lt;&#x2F;sup&gt;a ≡ 1 (mod p). now a&lt;sup&gt;p-2 is the inverse of &lt;code&gt;a&lt;&#x2F;code&gt; in &lt;code&gt;p&lt;&#x2F;code&gt; prime field.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Polynomials In The Context Of ZKP</title>
+        <published>2024-06-10T00:00:00+00:00</published>
+        <updated>2024-06-10T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://mrasnim.dev/tils/polynomials-in-the-context-of-zkp/"/>
+        <id>https://mrasnim.dev/tils/polynomials-in-the-context-of-zkp/</id>
+        
+        <content type="html" xml:base="https://mrasnim.dev/tils/polynomials-in-the-context-of-zkp/">&lt;p&gt;Why polynomials are relevant in ZKP..&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;They can store unbounded amount of data.&lt;&#x2F;li&gt;
+&lt;li&gt;They can store relationship between data.&lt;&#x2F;li&gt;
+&lt;li&gt;They help to check if two pieces of data are same efficiently.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h3 id=&quot;encoding-unbounded-amount-of-data&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#encoding-unbounded-amount-of-data&quot; aria-label=&quot;Anchor link for: encoding-unbounded-amount-of-data&quot;&gt;🔗&lt;&#x2F;a&gt;Encoding Unbounded amount of data.&lt;&#x2F;h3&gt;
+&lt;p&gt;Polynomials can store data in the form of coeffients and exponents..&lt;&#x2F;p&gt;
+&lt;p&gt;Example.&lt;&#x2F;br&gt;
+The binary number &lt;code&gt;10011&lt;&#x2F;code&gt; can be encoded as&lt;&#x2F;p&gt;
+&lt;div align=&#x27;center&#x27; style=&#x27;font-size: 24px;&#x27;&gt;&lt;b&gt;x&lt;sup&gt;4&lt;&#x2F;sup&gt;+x&lt;sup&gt;1&lt;&#x2F;sup&gt;+1&lt;&#x2F;b&gt;&lt;&#x2F;div&gt;
+&lt;p&gt;Another binary number say &lt;code&gt;11100000000000101010111&lt;&#x2F;code&gt; could be encoded as&lt;&#x2F;p&gt;
+&lt;div align=&#x27;center&#x27; style=&#x27;font-size: 24px;&#x27;&gt;&lt;b&gt;x&lt;sup&gt;19&lt;&#x2F;sup&gt;+x&lt;sup&gt;17&lt;&#x2F;sup&gt;+x&lt;sup&gt;16&lt;&#x2F;sup&gt;+x&lt;sup&gt;10&lt;&#x2F;sup&gt;+x&lt;sup&gt;5&lt;&#x2F;sup&gt;+x&lt;sup&gt;3&lt;&#x2F;sup&gt;+x&lt;sup&gt;2&lt;&#x2F;sup&gt;+x&lt;sup&gt;1&lt;&#x2F;sup&gt;+1&lt;&#x2F;b&gt;&lt;&#x2F;div&gt;
+&lt;p&gt;This is a polynomial of degree 19.&lt;&#x2F;p&gt;
+&lt;p&gt;Once we have these polynomials, we can then recover the data by evaluating the polynomial at specific points.
+here, by evaluating the polynomial at &lt;code&gt;x = 2&lt;&#x2F;code&gt; we can recover the number.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;encoding-relationship-between-data&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#encoding-relationship-between-data&quot; aria-label=&quot;Anchor link for: encoding-relationship-between-data&quot;&gt;🔗&lt;&#x2F;a&gt;Encoding relationship between data.&lt;&#x2F;h3&gt;
+&lt;p&gt;Along with storing data, polynomials can also store &lt;b&gt;relationship&lt;&#x2F;b&gt; between data. This process is called &lt;b&gt;polynomial interpolation&lt;&#x2F;b&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;To find the polynomial that passes through a set of points, we can use the &lt;b&gt;Lagrange interpolation&lt;&#x2F;b&gt; method.
+&lt;img src=&quot;&#x2F;images&#x2F;til&#x2F;lagrange-interpolation.png&quot; alt=&quot;image&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;checking-if-two-pieces-of-data-are-same&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#checking-if-two-pieces-of-data-are-same&quot; aria-label=&quot;Anchor link for: checking-if-two-pieces-of-data-are-same&quot;&gt;🔗&lt;&#x2F;a&gt;Checking if two pieces of data are same.&lt;&#x2F;h3&gt;
+&lt;p&gt;Comparing two polynomials is a hard problem. We could use brute force to check if two polynomials are same by checking if they are equal at all points.&lt;&#x2F;p&gt;
+&lt;p&gt;But this is inefficient.
+The other approach is &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Schwartz%E2%80%93Zippel_lemma&quot;&gt;Schwartz-Zippel lemma&lt;&#x2F;a&gt;, which states that the probability of a nonzero polynomial evaluating to zero at a random point is, at most, the degree of the polynomial divided by the number of possible evaluation points.&lt;&#x2F;p&gt;
+&lt;p&gt;This is not the perfect solution, but it is a good enough solution for most cases and ZKP&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>
