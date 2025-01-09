@@ -1,6 +1,6 @@
 +++
 title = "Making Home Made Guacamole"
-date = 2025-09-10
+date = 2025-01-09
 type = "posts"
 description = "Making Guacamole at home"
 in_search_index = true
@@ -28,8 +28,8 @@ I used to the following recipe.
 4. 2 chillies
 5. 1/2 Lime
 6. 1/2 tsp Salt
-7. 1/2 tsp Pepper
-8. 1/2 tsp Cumin
+
+I didn't have Cilantro to add, so skipped it. Adding Cilantro should make it more flavorful.
 
 Mash the avocado and add the rest of the ingredients. Give it a good mix.
 
