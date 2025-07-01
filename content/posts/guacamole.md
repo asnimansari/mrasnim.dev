@@ -1,8 +1,8 @@
 +++
-title = "Making Home Made Guacamole"
+title = "Home Made Guacamole"
 date = 2025-01-09
 type = "posts"
-description = "Making Guacamole at home"
+description = "Guacamole at home"
 in_search_index = true
 [taxonomies]
 tags = ["recipe"]
