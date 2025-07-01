@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>Asnim P Ansari - learning</title>
+    <subtitle>Ramblings on programming, tech and life.</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://mrasnim.dev/tags/learning/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://mrasnim.dev/"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2024-11-07T00:00:00+00:00</updated>
+    <id>https://mrasnim.dev/tags/learning/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Modular Arithmetic and Cryptography Learning Resources</title>
+        <published>2024-11-07T00:00:00+00:00</published>
+        <updated>2024-11-07T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://mrasnim.dev/posts/modular-arithmetic-and-cryptography-learning-resources/"/>
+        <id>https://mrasnim.dev/posts/modular-arithmetic-and-cryptography-learning-resources/</id>
+        
+        <content type="html" xml:base="https://mrasnim.dev/posts/modular-arithmetic-and-cryptography-learning-resources/">&lt;ol&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;crypto.stanford.edu&#x2F;pbc&#x2F;notes&#x2F;numbertheory&#x2F;&quot;&gt;Number Theory&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.khanacademy.org&#x2F;computing&#x2F;computer-science&#x2F;cryptography&#x2F;modarithmetic&quot;&gt;Modular Arithmetic by Khan Academy&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;brilliant.org&#x2F;wiki&#x2F;modular-arithmetic&#x2F;&quot;&gt;Modular Arithmetic by Brilliant&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+</content>
+        
+    </entry>
+</feed>

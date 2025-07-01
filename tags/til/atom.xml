@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>Asnim P Ansari - til</title>
+    <subtitle>Ramblings on programming, tech and life.</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://mrasnim.dev/tags/til/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://mrasnim.dev/"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2024-12-14T00:00:00+00:00</updated>
+    <id>https://mrasnim.dev/tags/til/atom.xml</id>
+    <entry xml:lang="en">
+        <title>IKEA Effect</title>
+        <published>2024-12-14T00:00:00+00:00</published>
+        <updated>2024-12-14T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://mrasnim.dev/tils/ikea-effect/"/>
+        <id>https://mrasnim.dev/tils/ikea-effect/</id>
+        
+        <content type="html" xml:base="https://mrasnim.dev/tils/ikea-effect/">&lt;p&gt;The IKEA effect is a cognitive bias that describes how people tend to value objects more if they make or assemble them themselves&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Rust Decorator</title>
+        <published>2024-11-06T00:00:00+00:00</published>
+        <updated>2024-11-06T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://mrasnim.dev/tils/rust-decorator/"/>
+        <id>https://mrasnim.dev/tils/rust-decorator/</id>
+        
+        <content type="html" xml:base="https://mrasnim.dev/tils/rust-decorator/">&lt;p&gt;I wanted to add see if there were any options like a &lt;code&gt;python decorator&lt;&#x2F;code&gt; in rust to wrap functions and add run some function before and after a function, example wrapping a function with extra logs, like tracking time it took for execution. Though my original requirement was to use redis lock for certain functions&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#6c7079;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;std::future::Future;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;std::pin::Pin;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;std::task::{Context, Poll};
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;std::time::Instant;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;&#x2F;&#x2F; Define `add_logging` to accept an async function
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5cb3fa;&quot;&gt;add_logging&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;&amp;lt;F, Fut&amp;gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;: F) -&amp;gt; impl Fn() -&amp;gt; Pin&amp;lt;Box&amp;lt;dyn Future&amp;lt;Output = ()&amp;gt;&amp;gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;where
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    F: Fn() -&amp;gt; Fut + Send + Sync + &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;&amp;#39;static&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    Fut: Future&amp;lt;Output = ()&amp;gt; + Send + &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;&amp;#39;static&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;|| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;        Box::pin(async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            println!(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;Before async function call&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; start &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;Instant::now();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;().await;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; duration &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; start.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;elapsed&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            println!(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;After async function call. Duration: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, duration);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;        })
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5cb3fa;&quot;&gt;my_function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;() {
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    println!(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;This is my async function!&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;#[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;tokio&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;] &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;&#x2F;&#x2F; Or `async-std::main` depending on your runtime
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5cb3fa;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;() {
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; decorated_function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;add_logging&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(my_function);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;decorated_function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;().await; &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;&#x2F;&#x2F; Calls the wrapped async function
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now the issue here is we can’t pass arguments to the above function which is being wrapped as it is a &lt;code&gt;Fn()&lt;&#x2F;code&gt;. and the way to pass functions dynamically is using something as follows..&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#6c7079;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;std::future::Future;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;std::pin::Pin;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;std::time::Instant;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;&#x2F;&#x2F; Define `add_logging` to accept a function with dynamic parameters
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5cb3fa;&quot;&gt;add_logging&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;&amp;lt;F, Fut, Args&amp;gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;: F) -&amp;gt; impl Fn(Args) -&amp;gt; Pin&amp;lt;Box&amp;lt;dyn Future&amp;lt;Output = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;Fut::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;Output&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;+ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;Send&amp;gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;where
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    F: Fn(Args) -&amp;gt; Fut + Send + Sync + &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;&amp;#39;static&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    Fut: Future + Send + &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;&amp;#39;static&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    Args: Send + &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;&amp;#39;static&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;|&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;args: Args&lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;        Box::pin(async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            println!(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;Before async function call&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; start &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;Instant::now();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; result &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(args).await;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; duration &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; start.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;elapsed&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            println!(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;After async function call. Duration: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, duration);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            result &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;&#x2F;&#x2F; Return the result of the wrapped function
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;        })
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;&#x2F;&#x2F; Example async function with parameters
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5cb3fa;&quot;&gt;my_function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;input&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;: String, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;count&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;usize&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;) -&amp;gt; String {
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    println!(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;Inside my_function with input: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;, count: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, input, count);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    format!(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;Processed: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt; (count: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;)&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, input, count)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;#[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;tokio&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;]
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5cb3fa;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;() {
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;&#x2F;&#x2F; Decorate the async function
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; decorated_function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;add_logging&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(|(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;input&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;count&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;): (String, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;usize&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;)| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;my_function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(input, count));
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;&#x2F;&#x2F; Call the decorated function with dynamic parameters
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; result &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;decorated_function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;((&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;Hello, world!&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;to_string&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(), &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;42&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;)).await;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    println!(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;Result: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, result);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
+        
+    </entry>
+</feed>

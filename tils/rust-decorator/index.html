@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rust Decorator | Asnim P Ansari</title>
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+    <meta name="title" content="Rust Decorator">
+<meta property="og:site_name" content="Asnim P Ansari">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Rust Decorator">
+<meta property="og:description" content="Learning about decorater ">
+<meta property="og:url" content="https://mrasnim.dev/https://mrasnim.dev/tils/rust-decorator/">
+
+<meta property="article:published_time" content="2024-11-06">
+    <meta property="article:modified_time" content="2024-11-06">
+
+    <meta property="article:tag" content="rust">
+        <meta property="article:tag" content="til">
+        <meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Rust Decorator">
+<meta name="twitter:description" content="Learning about decorater ">
+<meta name="twitter:url" content="https://mrasnim.dev/https://mrasnim.dev/tils/rust-decorator/">
+
+<meta name="twitter:site" content="@asnimansari">
+
+<meta name="twitter:label1" content="Written by">
+    <meta name="twitter:data1" content="Asnim P Ansari">
+
+    <meta name="twitter:label2" content="Filed under">
+        <meta name="twitter:data2" content="rust,til">
+    <meta name="twitter:creator" content="@asnimansari">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://mrasnim.dev/styles/main.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.1/feather.min.js" integrity="sha512-4lykFR6C2W55I60sYddEGjieC2fU79R7GUtaqr3DzmNbo0vSaO1MfUjMoTFYYuedjfEix6uV9jVTtRCSBU/Xiw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+</head>
+<body>
+<header>
+    <a href="https://mrasnim.dev/" class="title">
+        <h2 class="name">Asnim P Ansari</h2>
+    </a>
+    <nav>
+        <div class="nav-items">
+            <a href="https://mrasnim.dev/">Home</a>
+            <a href="https://mrasnim.dev/posts/">Posts</a>
+            <a href="https://mrasnim.dev/tils/">TIL</a>
+            <a href="https://mrasnim.dev/webfound/">WebFound</a>
+            <a href="https://mrasnim.dev/contact/">Contact</a></div>
+        <button class="theme-toggle" title="Toggle Dark Mode">
+            <i data-feather="moon"></i>
+        </button>
+    </nav>
+</header>
+
+    <h1>Rust Decorator</h1>
+    <div class="meta">
+      <div class="post-date">
+              <i>
+                  <time datetime='2024-11-06T00:00:00+00:00' pubdate>06 Nov, 2024</time>
+              </i>
+      </div>
+      <div class="reading-time">
+          
+          
+          <i>3 minutes (790 words)</i>
+      </div>
+  </div>
+  <main>
+    <p>I wanted to add see if there were any options like a <code>python decorator</code> in rust to wrap functions and add run some function before and after a function, example wrapping a function with extra logs, like tracking time it took for execution. Though my original requirement was to use redis lock for certain functions</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#6c7079;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#abb2bf;">
+</span><span style="color:#cd74e8;">use </span><span style="color:#abb2bf;">std::future::Future;
+</span><span style="color:#cd74e8;">use </span><span style="color:#abb2bf;">std::pin::Pin;
+</span><span style="color:#cd74e8;">use </span><span style="color:#abb2bf;">std::task::{Context, Poll};
+</span><span style="color:#cd74e8;">use </span><span style="color:#abb2bf;">std::time::Instant;
+</span><span style="color:#abb2bf;">
+</span><span style="font-style:italic;color:#5f697a;">// Define `add_logging` to accept an async function
+</span><span style="color:#cd74e8;">fn </span><span style="color:#5cb3fa;">add_logging</span><span style="color:#abb2bf;">&lt;F, Fut&gt;(</span><span style="color:#eb6772;">f</span><span style="color:#abb2bf;">: F) -&gt; impl Fn() -&gt; Pin&lt;Box&lt;dyn Future&lt;Output = ()&gt;&gt;&gt;
+</span><span style="color:#cd74e8;">where
+</span><span style="color:#abb2bf;">    F: Fn() -&gt; Fut + Send + Sync + </span><span style="color:#cd74e8;">&#39;static</span><span style="color:#abb2bf;">,
+</span><span style="color:#abb2bf;">    Fut: Future&lt;Output = ()&gt; + Send + </span><span style="color:#cd74e8;">&#39;static</span><span style="color:#abb2bf;">,
+</span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">move </span><span style="color:#adb7c9;">|| </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">        Box::pin(async </span><span style="color:#cd74e8;">move </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">            println!(</span><span style="color:#9acc76;">&quot;Before async function call&quot;</span><span style="color:#abb2bf;">);
+</span><span style="color:#abb2bf;">            </span><span style="color:#cd74e8;">let</span><span style="color:#abb2bf;"> start </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">Instant::now();
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">            </span><span style="color:#5ebfcc;">f</span><span style="color:#abb2bf;">().await;
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">            </span><span style="color:#cd74e8;">let</span><span style="color:#abb2bf;"> duration </span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;"> start.</span><span style="color:#5ebfcc;">elapsed</span><span style="color:#abb2bf;">();
+</span><span style="color:#abb2bf;">            println!(</span><span style="color:#9acc76;">&quot;After async function call. Duration: </span><span style="color:#db9d63;">{:?}</span><span style="color:#9acc76;">&quot;</span><span style="color:#abb2bf;">, duration);
+</span><span style="color:#abb2bf;">        })
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">}
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">async </span><span style="color:#cd74e8;">fn </span><span style="color:#5cb3fa;">my_function</span><span style="color:#abb2bf;">() {
+</span><span style="color:#abb2bf;">    println!(</span><span style="color:#9acc76;">&quot;This is my async function!&quot;</span><span style="color:#abb2bf;">);
+</span><span style="color:#abb2bf;">}
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">#[</span><span style="color:#eb6772;">tokio</span><span style="color:#abb2bf;">::</span><span style="color:#eb6772;">main</span><span style="color:#abb2bf;">] </span><span style="font-style:italic;color:#5f697a;">// Or `async-std::main` depending on your runtime
+</span><span style="color:#abb2bf;">async </span><span style="color:#cd74e8;">fn </span><span style="color:#5cb3fa;">main</span><span style="color:#abb2bf;">() {
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">let</span><span style="color:#abb2bf;"> decorated_function </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">add_logging</span><span style="color:#abb2bf;">(my_function);
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">decorated_function</span><span style="color:#abb2bf;">().await; </span><span style="font-style:italic;color:#5f697a;">// Calls the wrapped async function
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>Now the issue here is we can’t pass arguments to the above function which is being wrapped as it is a <code>Fn()</code>. and the way to pass functions dynamically is using something as follows..</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#6c7079;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#abb2bf;">
+</span><span style="color:#cd74e8;">use </span><span style="color:#abb2bf;">std::future::Future;
+</span><span style="color:#cd74e8;">use </span><span style="color:#abb2bf;">std::pin::Pin;
+</span><span style="color:#cd74e8;">use </span><span style="color:#abb2bf;">std::time::Instant;
+</span><span style="color:#abb2bf;">
+</span><span style="font-style:italic;color:#5f697a;">// Define `add_logging` to accept a function with dynamic parameters
+</span><span style="color:#cd74e8;">fn </span><span style="color:#5cb3fa;">add_logging</span><span style="color:#abb2bf;">&lt;F, Fut, Args&gt;(</span><span style="color:#eb6772;">f</span><span style="color:#abb2bf;">: F) -&gt; impl Fn(Args) -&gt; Pin&lt;Box&lt;dyn Future&lt;Output = </span><span style="color:#cd74e8;">Fut::</span><span style="color:#abb2bf;">Output&gt; </span><span style="color:#adb7c9;">+ </span><span style="color:#abb2bf;">Send&gt;&gt;
+</span><span style="color:#cd74e8;">where
+</span><span style="color:#abb2bf;">    F: Fn(Args) -&gt; Fut + Send + Sync + </span><span style="color:#cd74e8;">&#39;static</span><span style="color:#abb2bf;">,
+</span><span style="color:#abb2bf;">    Fut: Future + Send + </span><span style="color:#cd74e8;">&#39;static</span><span style="color:#abb2bf;">,
+</span><span style="color:#abb2bf;">    Args: Send + </span><span style="color:#cd74e8;">&#39;static</span><span style="color:#abb2bf;">,
+</span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">move </span><span style="color:#adb7c9;">|</span><span style="color:#abb2bf;">args: Args</span><span style="color:#adb7c9;">| </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">        Box::pin(async </span><span style="color:#cd74e8;">move </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">            println!(</span><span style="color:#9acc76;">&quot;Before async function call&quot;</span><span style="color:#abb2bf;">);
+</span><span style="color:#abb2bf;">            </span><span style="color:#cd74e8;">let</span><span style="color:#abb2bf;"> start </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">Instant::now();
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">            </span><span style="color:#cd74e8;">let</span><span style="color:#abb2bf;"> result </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">f</span><span style="color:#abb2bf;">(args).await;
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">            </span><span style="color:#cd74e8;">let</span><span style="color:#abb2bf;"> duration </span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;"> start.</span><span style="color:#5ebfcc;">elapsed</span><span style="color:#abb2bf;">();
+</span><span style="color:#abb2bf;">            println!(</span><span style="color:#9acc76;">&quot;After async function call. Duration: </span><span style="color:#db9d63;">{:?}</span><span style="color:#9acc76;">&quot;</span><span style="color:#abb2bf;">, duration);
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">            result </span><span style="font-style:italic;color:#5f697a;">// Return the result of the wrapped function
+</span><span style="color:#abb2bf;">        })
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">}
+</span><span style="color:#abb2bf;">
+</span><span style="font-style:italic;color:#5f697a;">// Example async function with parameters
+</span><span style="color:#abb2bf;">async </span><span style="color:#cd74e8;">fn </span><span style="color:#5cb3fa;">my_function</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">input</span><span style="color:#abb2bf;">: String, </span><span style="color:#eb6772;">count</span><span style="color:#abb2bf;">: </span><span style="color:#cd74e8;">usize</span><span style="color:#abb2bf;">) -&gt; String {
+</span><span style="color:#abb2bf;">    println!(</span><span style="color:#9acc76;">&quot;Inside my_function with input: </span><span style="color:#db9d63;">{}</span><span style="color:#9acc76;">, count: </span><span style="color:#db9d63;">{}</span><span style="color:#9acc76;">&quot;</span><span style="color:#abb2bf;">, input, count);
+</span><span style="color:#abb2bf;">    format!(</span><span style="color:#9acc76;">&quot;Processed: </span><span style="color:#db9d63;">{}</span><span style="color:#9acc76;"> (count: </span><span style="color:#db9d63;">{}</span><span style="color:#9acc76;">)&quot;</span><span style="color:#abb2bf;">, input, count)
+</span><span style="color:#abb2bf;">}
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">#[</span><span style="color:#eb6772;">tokio</span><span style="color:#abb2bf;">::</span><span style="color:#eb6772;">main</span><span style="color:#abb2bf;">]
+</span><span style="color:#abb2bf;">async </span><span style="color:#cd74e8;">fn </span><span style="color:#5cb3fa;">main</span><span style="color:#abb2bf;">() {
+</span><span style="color:#abb2bf;">    </span><span style="font-style:italic;color:#5f697a;">// Decorate the async function
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">let</span><span style="color:#abb2bf;"> decorated_function </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">add_logging</span><span style="color:#abb2bf;">(|(</span><span style="color:#eb6772;">input</span><span style="color:#abb2bf;">, </span><span style="color:#eb6772;">count</span><span style="color:#abb2bf;">): (String, </span><span style="color:#cd74e8;">usize</span><span style="color:#abb2bf;">)| </span><span style="color:#5ebfcc;">my_function</span><span style="color:#abb2bf;">(input, count));
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="font-style:italic;color:#5f697a;">// Call the decorated function with dynamic parameters
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">let</span><span style="color:#abb2bf;"> result </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">decorated_function</span><span style="color:#abb2bf;">((</span><span style="color:#9acc76;">&quot;Hello, world!&quot;</span><span style="color:#abb2bf;">.</span><span style="color:#5ebfcc;">to_string</span><span style="color:#abb2bf;">(), </span><span style="color:#db9d63;">42</span><span style="color:#abb2bf;">)).await;
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    println!(</span><span style="color:#9acc76;">&quot;Result: </span><span style="color:#db9d63;">{}</span><span style="color:#9acc76;">&quot;</span><span style="color:#abb2bf;">, result);
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+
+  </main>
+  <p class="tags">
+        Tags:
+          <a href="https://mrasnim.dev/tags/rust/">#rust</a>
+          <a href="https://mrasnim.dev/tags/til/">#til</a>
+  </p>
+<footer>
+    © 2024 Asnim P Ansari<br>
+    <div class="social-links">
+        <a href="https://github.com/asnimansari" target="_blank" rel="noopener noreferrer" title="GitHub" class="social-icon"><i data-feather="github"></i></a>
+        <a href="/posts/atom.xml" target="_blank" rel="noopener noreferrer" title="RSS Feed" class="social-icon"><i data-feather="rss"></i></a>
+    </div>
+</footer>
+<script>
+    feather.replace();
+    const themeToggle = document.querySelector('.theme-toggle');
+    const currentTheme = localStorage.getItem('theme');
+
+    // Set the initial theme based on user preference or localStorage
+    if (currentTheme) {
+        document.body.setAttribute('data-theme', currentTheme);
+        if (currentTheme === 'dark') {
+            themeToggle.innerHTML = '<i data-feather="sun"></i>';
+            feather.replace();
+        }
+    }
+
+    themeToggle.addEventListener('click', function() {
+        let theme = 'light';
+        
+        // Add the transition class
+        document.body.classList.add('theme-transition');
+
+        if (document.body.getAttribute('data-theme') !== 'dark') {
+            theme = 'dark';
+            themeToggle.innerHTML = '<i data-feather="sun"></i>';
+        } else {
+            themeToggle.innerHTML = '<i data-feather="moon"></i>';
+        }
+        feather.replace();
+        document.body.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+
+        // Remove the transition class after 0.5s
+        setTimeout(() => {
+            document.body.classList.remove('theme-transition');
+        }, 500);
+    });
+</script>
+</html>

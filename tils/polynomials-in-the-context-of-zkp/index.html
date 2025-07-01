@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polynomials In The Context Of ZKP | Asnim P Ansari</title>
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+    <meta name="title" content="Polynomials In The Context Of ZKP">
+<meta property="og:site_name" content="Asnim P Ansari">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Polynomials In The Context Of ZKP">
+<meta property="og:description" content="Polynomials In The Context Of ZKP">
+<meta property="og:url" content="https://mrasnim.dev/https://mrasnim.dev/tils/polynomials-in-the-context-of-zkp/">
+
+<meta property="article:published_time" content="2024-06-10">
+    <meta property="article:modified_time" content="2024-06-10">
+
+    <meta property="article:tag" content="ZKP">
+        <meta property="article:tag" content="mathematics">
+        <meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Polynomials In The Context Of ZKP">
+<meta name="twitter:description" content="Polynomials In The Context Of ZKP">
+<meta name="twitter:url" content="https://mrasnim.dev/https://mrasnim.dev/tils/polynomials-in-the-context-of-zkp/">
+
+<meta name="twitter:site" content="@asnimansari">
+
+<meta name="twitter:label1" content="Written by">
+    <meta name="twitter:data1" content="Asnim P Ansari">
+
+    <meta name="twitter:label2" content="Filed under">
+        <meta name="twitter:data2" content="ZKP,mathematics">
+    <meta name="twitter:creator" content="@asnimansari">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://mrasnim.dev/styles/main.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.1/feather.min.js" integrity="sha512-4lykFR6C2W55I60sYddEGjieC2fU79R7GUtaqr3DzmNbo0vSaO1MfUjMoTFYYuedjfEix6uV9jVTtRCSBU/Xiw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+</head>
+<body>
+<header>
+    <a href="https://mrasnim.dev/" class="title">
+        <h2 class="name">Asnim P Ansari</h2>
+    </a>
+    <nav>
+        <div class="nav-items">
+            <a href="https://mrasnim.dev/">Home</a>
+            <a href="https://mrasnim.dev/posts/">Posts</a>
+            <a href="https://mrasnim.dev/tils/">TIL</a>
+            <a href="https://mrasnim.dev/webfound/">WebFound</a>
+            <a href="https://mrasnim.dev/contact/">Contact</a></div>
+        <button class="theme-toggle" title="Toggle Dark Mode">
+            <i data-feather="moon"></i>
+        </button>
+    </nav>
+</header>
+
+    <h1>Polynomials In The Context Of ZKP</h1>
+    <div class="meta">
+      <div class="post-date">
+              <i>
+                  <time datetime='2024-06-10T00:00:00+00:00' pubdate>10 Jun, 2024</time>
+              </i>
+      </div>
+      <div class="reading-time">
+          
+          
+          <i>1 minutes (251 words)</i>
+      </div>
+  </div>
+  <main>
+    <p>Why polynomials are relevant in ZKP..</p>
+<ol>
+<li>They can store unbounded amount of data.</li>
+<li>They can store relationship between data.</li>
+<li>They help to check if two pieces of data are same efficiently.</li>
+</ol>
+<h3 id="encoding-unbounded-amount-of-data"><a class="zola-anchor" href="#encoding-unbounded-amount-of-data" aria-label="Anchor link for: encoding-unbounded-amount-of-data">🔗</a>Encoding Unbounded amount of data.</h3>
+<p>Polynomials can store data in the form of coeffients and exponents..</p>
+<p>Example.</br>
+The binary number <code>10011</code> can be encoded as</p>
+<div align='center' style='font-size: 24px;'><b>x<sup>4</sup>+x<sup>1</sup>+1</b></div>
+<p>Another binary number say <code>11100000000000101010111</code> could be encoded as</p>
+<div align='center' style='font-size: 24px;'><b>x<sup>19</sup>+x<sup>17</sup>+x<sup>16</sup>+x<sup>10</sup>+x<sup>5</sup>+x<sup>3</sup>+x<sup>2</sup>+x<sup>1</sup>+1</b></div>
+<p>This is a polynomial of degree 19.</p>
+<p>Once we have these polynomials, we can then recover the data by evaluating the polynomial at specific points.
+here, by evaluating the polynomial at <code>x = 2</code> we can recover the number.</p>
+<h3 id="encoding-relationship-between-data"><a class="zola-anchor" href="#encoding-relationship-between-data" aria-label="Anchor link for: encoding-relationship-between-data">🔗</a>Encoding relationship between data.</h3>
+<p>Along with storing data, polynomials can also store <b>relationship</b> between data. This process is called <b>polynomial interpolation</b>.</p>
+<p>To find the polynomial that passes through a set of points, we can use the <b>Lagrange interpolation</b> method.
+<img src="/images/til/lagrange-interpolation.png" alt="image" /></p>
+<h3 id="checking-if-two-pieces-of-data-are-same"><a class="zola-anchor" href="#checking-if-two-pieces-of-data-are-same" aria-label="Anchor link for: checking-if-two-pieces-of-data-are-same">🔗</a>Checking if two pieces of data are same.</h3>
+<p>Comparing two polynomials is a hard problem. We could use brute force to check if two polynomials are same by checking if they are equal at all points.</p>
+<p>But this is inefficient.
+The other approach is <a href="https://en.wikipedia.org/wiki/Schwartz%E2%80%93Zippel_lemma">Schwartz-Zippel lemma</a>, which states that the probability of a nonzero polynomial evaluating to zero at a random point is, at most, the degree of the polynomial divided by the number of possible evaluation points.</p>
+<p>This is not the perfect solution, but it is a good enough solution for most cases and ZKP</p>
+
+  </main>
+  <p class="tags">
+        Tags:
+          <a href="https://mrasnim.dev/tags/zkp/">#ZKP</a>
+          <a href="https://mrasnim.dev/tags/mathematics/">#mathematics</a>
+  </p>
+<footer>
+    © 2024 Asnim P Ansari<br>
+    <div class="social-links">
+        <a href="https://github.com/asnimansari" target="_blank" rel="noopener noreferrer" title="GitHub" class="social-icon"><i data-feather="github"></i></a>
+        <a href="/posts/atom.xml" target="_blank" rel="noopener noreferrer" title="RSS Feed" class="social-icon"><i data-feather="rss"></i></a>
+    </div>
+</footer>
+<script>
+    feather.replace();
+    const themeToggle = document.querySelector('.theme-toggle');
+    const currentTheme = localStorage.getItem('theme');
+
+    // Set the initial theme based on user preference or localStorage
+    if (currentTheme) {
+        document.body.setAttribute('data-theme', currentTheme);
+        if (currentTheme === 'dark') {
+            themeToggle.innerHTML = '<i data-feather="sun"></i>';
+            feather.replace();
+        }
+    }
+
+    themeToggle.addEventListener('click', function() {
+        let theme = 'light';
+        
+        // Add the transition class
+        document.body.classList.add('theme-transition');
+
+        if (document.body.getAttribute('data-theme') !== 'dark') {
+            theme = 'dark';
+            themeToggle.innerHTML = '<i data-feather="sun"></i>';
+        } else {
+            themeToggle.innerHTML = '<i data-feather="moon"></i>';
+        }
+        feather.replace();
+        document.body.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+
+        // Remove the transition class after 0.5s
+        setTimeout(() => {
+            document.body.classList.remove('theme-transition');
+        }, 500);
+    });
+</script>
+</html>

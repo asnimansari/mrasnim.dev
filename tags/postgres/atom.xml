@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>Asnim P Ansari - postgres</title>
+    <subtitle>Ramblings on programming, tech and life.</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://mrasnim.dev/tags/postgres/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://mrasnim.dev/"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2024-12-31T00:00:00+00:00</updated>
+    <id>https://mrasnim.dev/tags/postgres/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Deleting Duplicate Records In Posgtgres</title>
+        <published>2024-12-31T00:00:00+00:00</published>
+        <updated>2024-12-31T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://mrasnim.dev/tils/deleting-duplicate-records-in-posgtgres/"/>
+        <id>https://mrasnim.dev/tils/deleting-duplicate-records-in-posgtgres/</id>
+        
+        <content type="html" xml:base="https://mrasnim.dev/tils/deleting-duplicate-records-in-posgtgres/">&lt;pre data-lang=&quot;sql&quot; style=&quot;background-color:#2b303b;color:#6c7079;&quot; class=&quot;language-sql &quot;&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;-- Create sample table
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;CREATE TABLE &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5cb3fa;&quot;&gt;employees&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; (
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    id &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;SERIAL PRIMARY KEY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    first_name &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;VARCHAR&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;50&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;),
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    last_name &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;VARCHAR&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;50&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;),
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    email &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;VARCHAR&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;100&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;),
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    department &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;VARCHAR&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;50&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;),
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    salary &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;NUMERIC&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;10&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;-- Insert sample data with duplicates
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;INSERT INTO&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; employees (first_name, last_name, email, department, salary) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;VALUES
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;John&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Doe&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;john.doe@example.com&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;IT&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;50000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;00&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;),
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;John&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Doe&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;john.doe@example.com&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;IT&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;50000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;00&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;),
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Jane&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Smith&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;jane.smith@example.com&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;HR&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;55000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;00&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;),
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Jane&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Smith&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;jane.smith@example.com&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;HR&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;55000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;00&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;),
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Mike&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Johnson&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;mike.johnson@example.com&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Finance&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;60000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;00&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;),
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Mike&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Johnson&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;mike.johnson@example.com&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9acc76;&quot;&gt;&amp;#39;Finance&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;60000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;00&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;-- Method 1: Delete duplicates keeping lowest ID
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;WITH&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; duplicates &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;AS&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; (
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;SELECT
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;        id,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;        ROW_NUMBER() OVER (
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            PARTITION BY first_name, last_name, email
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;ORDER BY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; id
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;        ) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;AS&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; row_num
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; employees
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;DELETE FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; employees
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;WHERE&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; id &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;IN&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; (
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;SELECT&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; id
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; duplicates
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;WHERE&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; row_num &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;-- Method 2: Delete duplicates using CTID
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;DELETE FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; employees
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;WHERE&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; ctid NOT &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;IN&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; (
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;SELECT &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5ebfcc;&quot;&gt;MIN&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;(ctid)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; employees
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;GROUP BY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; first_name, last_name, email
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;-- Method 3: Advanced deletion with custom criteria
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;WITH&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; cte &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;AS&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; (
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;SELECT
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;        ROW_NUMBER() OVER (
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            PARTITION BY first_name, last_name, email
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;ORDER BY&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; salary &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;DESC
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;        ) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;AS&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; rn
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; employees
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;DELETE FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; employees
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;WHERE&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; id &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;IN&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; (
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;SELECT&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; id
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; cte
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;WHERE&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; rn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#adb7c9;&quot;&gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#db9d63;&quot;&gt;1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#5f697a;&quot;&gt;-- Verify results
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;SELECT &lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb6772;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cd74e8;&quot;&gt;FROM&lt;&#x2F;span&gt;&lt;span style=&quot;color:#abb2bf;&quot;&gt; employees;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
+        
+    </entry>
+</feed>

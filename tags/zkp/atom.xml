@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>Asnim P Ansari - ZKP</title>
+    <subtitle>Ramblings on programming, tech and life.</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://mrasnim.dev/tags/zkp/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://mrasnim.dev/"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2024-06-10T00:00:00+00:00</updated>
+    <id>https://mrasnim.dev/tags/zkp/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Polynomials In The Context Of ZKP</title>
+        <published>2024-06-10T00:00:00+00:00</published>
+        <updated>2024-06-10T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://mrasnim.dev/tils/polynomials-in-the-context-of-zkp/"/>
+        <id>https://mrasnim.dev/tils/polynomials-in-the-context-of-zkp/</id>
+        
+        <content type="html" xml:base="https://mrasnim.dev/tils/polynomials-in-the-context-of-zkp/">&lt;p&gt;Why polynomials are relevant in ZKP..&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;They can store unbounded amount of data.&lt;&#x2F;li&gt;
+&lt;li&gt;They can store relationship between data.&lt;&#x2F;li&gt;
+&lt;li&gt;They help to check if two pieces of data are same efficiently.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h3 id=&quot;encoding-unbounded-amount-of-data&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#encoding-unbounded-amount-of-data&quot; aria-label=&quot;Anchor link for: encoding-unbounded-amount-of-data&quot;&gt;🔗&lt;&#x2F;a&gt;Encoding Unbounded amount of data.&lt;&#x2F;h3&gt;
+&lt;p&gt;Polynomials can store data in the form of coeffients and exponents..&lt;&#x2F;p&gt;
+&lt;p&gt;Example.&lt;&#x2F;br&gt;
+The binary number &lt;code&gt;10011&lt;&#x2F;code&gt; can be encoded as&lt;&#x2F;p&gt;
+&lt;div align=&#x27;center&#x27; style=&#x27;font-size: 24px;&#x27;&gt;&lt;b&gt;x&lt;sup&gt;4&lt;&#x2F;sup&gt;+x&lt;sup&gt;1&lt;&#x2F;sup&gt;+1&lt;&#x2F;b&gt;&lt;&#x2F;div&gt;
+&lt;p&gt;Another binary number say &lt;code&gt;11100000000000101010111&lt;&#x2F;code&gt; could be encoded as&lt;&#x2F;p&gt;
+&lt;div align=&#x27;center&#x27; style=&#x27;font-size: 24px;&#x27;&gt;&lt;b&gt;x&lt;sup&gt;19&lt;&#x2F;sup&gt;+x&lt;sup&gt;17&lt;&#x2F;sup&gt;+x&lt;sup&gt;16&lt;&#x2F;sup&gt;+x&lt;sup&gt;10&lt;&#x2F;sup&gt;+x&lt;sup&gt;5&lt;&#x2F;sup&gt;+x&lt;sup&gt;3&lt;&#x2F;sup&gt;+x&lt;sup&gt;2&lt;&#x2F;sup&gt;+x&lt;sup&gt;1&lt;&#x2F;sup&gt;+1&lt;&#x2F;b&gt;&lt;&#x2F;div&gt;
+&lt;p&gt;This is a polynomial of degree 19.&lt;&#x2F;p&gt;
+&lt;p&gt;Once we have these polynomials, we can then recover the data by evaluating the polynomial at specific points.
+here, by evaluating the polynomial at &lt;code&gt;x = 2&lt;&#x2F;code&gt; we can recover the number.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;encoding-relationship-between-data&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#encoding-relationship-between-data&quot; aria-label=&quot;Anchor link for: encoding-relationship-between-data&quot;&gt;🔗&lt;&#x2F;a&gt;Encoding relationship between data.&lt;&#x2F;h3&gt;
+&lt;p&gt;Along with storing data, polynomials can also store &lt;b&gt;relationship&lt;&#x2F;b&gt; between data. This process is called &lt;b&gt;polynomial interpolation&lt;&#x2F;b&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;To find the polynomial that passes through a set of points, we can use the &lt;b&gt;Lagrange interpolation&lt;&#x2F;b&gt; method.
+&lt;img src=&quot;&#x2F;images&#x2F;til&#x2F;lagrange-interpolation.png&quot; alt=&quot;image&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;checking-if-two-pieces-of-data-are-same&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#checking-if-two-pieces-of-data-are-same&quot; aria-label=&quot;Anchor link for: checking-if-two-pieces-of-data-are-same&quot;&gt;🔗&lt;&#x2F;a&gt;Checking if two pieces of data are same.&lt;&#x2F;h3&gt;
+&lt;p&gt;Comparing two polynomials is a hard problem. We could use brute force to check if two polynomials are same by checking if they are equal at all points.&lt;&#x2F;p&gt;
+&lt;p&gt;But this is inefficient.
+The other approach is &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Schwartz%E2%80%93Zippel_lemma&quot;&gt;Schwartz-Zippel lemma&lt;&#x2F;a&gt;, which states that the probability of a nonzero polynomial evaluating to zero at a random point is, at most, the degree of the polynomial divided by the number of possible evaluation points.&lt;&#x2F;p&gt;
+&lt;p&gt;This is not the perfect solution, but it is a good enough solution for most cases and ZKP&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>
