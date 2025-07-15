@@ -12,7 +12,7 @@
 	--pagefind-ui-border-width: 1px;
 
 	[data-theme="dark"] & {
-		--pagefind-ui-background: var(--color-zinc-800);
+		--pagefind-ui-background: oklch(0% 0 0);
 		--pagefind-ui-border: var(--color-zinc-500);
 	}
 }
