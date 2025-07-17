@@ -26,3 +26,9 @@ Some of the postcards I sent this year are..
 
 ![L5](./L5.jpeg)
 <p align="center"><em>From Istanbul, Turkey</em></p>
+
+![L6](./L6.jpg)
+<p align="center"><em>From Vienna, Austria.</em></p>
+
+![L7](./L7.jpg)
+<p align="center"><em>From Zupspitze, Germany.</em></p>
