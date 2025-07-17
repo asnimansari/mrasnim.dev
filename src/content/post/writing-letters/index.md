@@ -1,7 +1,7 @@
 ---
 title: Writing Letters to your favourites
 description: Notes on Writing Letters from abroad.
-publishDate: "2025-07-17T11:23:00Z"
+publishDate: "2025-07-16T11:23:00Z"
 ---
 
 We used to write letters to our home when we travelled abroad as a souvenir.
@@ -24,5 +24,5 @@ Some of the postcards I sent this year are..
 ![L4](./L4.jpg)
 <p align="center"><em>From Zupspitze, Germany.</em></p>
 
-![L5](./L5.jpg)
+![L5](./L5.jpeg)
 <p align="center"><em>From Istanbul, Turkey</em></p>
