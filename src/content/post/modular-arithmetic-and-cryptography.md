@@ -1,11 +1,11 @@
-+++
-title = "Modular Arithmetic and Cryptography Learning Resources"
-date = 2024-11-07
-type = "posts"
-description = "Modular Arithmetic and Cryptography Learning Resources"
-in_search_index = true
-[taxonomies]
-tags = ["cryptography", "learning"]
+---
+title: Modular Arithmetic and Cryptography Learning Resources
+description: Modular Arithmetic and Cryptography Learning Resources
+publishDate: "2025-07-24T11:23:00Z"
+tags: ["learning", "modular-arithmetic", "cryptography"]
+---
+
+
 +++
 
 1. [Number Theory](https://crypto.stanford.edu/pbc/notes/numbertheory/)
